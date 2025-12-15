@@ -9,13 +9,23 @@ declare global {
         // 获取当前环境
         getEnv: (callback: (env: UniEnv) => void) => void;
       };
+      navigateBack: () => void;
     };
-    
+    wx?: {
+      miniProgram: {
+        navigateBack: () => void;
+        postMessage: (data: { data: any }) => void;
+      };
+    };
     // 简化的通信对象声明
     webUni?: {
       postMessage: (data: { data: any }) => void;
       getEnv: (callback: (env: UniEnv) => void) => void;
+      navigateBack: () => void;
     };
+    receiveAppData: (data: any) => void;
+    sendParentData: (data: any) => void;
+    testUniAppCall: (data: any) => void;
   }
 }
 

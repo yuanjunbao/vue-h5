@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <!-- 适配刘海屏 -->
   <script>
@@ -19,40 +20,55 @@
 </head>
 
 <body>
- 
+
   <div id="app"></div>
   <script type="module" src="/src/main.ts"></script>
-  <!-- 引入uni.webview.js -->
-  <script type="text/javascript" src="/static/uni.webview.1.5.6.js"></script>
-  <!-- 初始化uni变量 -->
-  <script type="text/javascript">
-    var userAgent = navigator.userAgent;
-    if (userAgent.indexOf('AlipayClient') > -1) {
-      // 支付宝小程序的 JS-SDK 防止 404 需要动态加载，如果不需要兼容支付宝小程序，则无需引用此 JS 文件。
-      document.writeln('<script src="https://appx/web-view.min.js"' + '>' + '<' + '/' + 'script>');
-    } else if (/QQ/i.test(userAgent) && /miniProgram/i.test(userAgent)) {
-      // QQ 小程序
-      document.write(
-        '<script type="text/javascript" src="https://qqq.gtimg.cn/miniprogram/webview_jssdk/qqjssdk-1.0.0.js"><\/script>'
-      );
-    } else if (/miniProgram/i.test(userAgent) && /micromessenger/i.test(userAgent)) {
-      // 微信小程序 JS-SDK 如果不需要兼容微信小程序，则无需引用此 JS 文件。
-      document.write('<script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js"><\/script>');
-    } else if (/toutiaomicroapp/i.test(userAgent)) {
-      // 头条小程序 JS-SDK 如果不需要兼容头条小程序，则无需引用此 JS 文件。
-      document.write(
-        '<script type="text/javascript" src="https://lf1-cdn-tos.bytegoofy.com/goofy/developer/jssdk/jssdk-1.2.0.js"><\/script>');
-    } else if (/swan/i.test(userAgent)) {
-      // 百度小程序 JS-SDK 如果不需要兼容百度小程序，则无需引用此 JS 文件。
-      document.write(
-        '<script type="text/javascript" src="https://b.bdstatic.com/searchbox/icms/searchbox/js/swan-2.0.18.js"><\/script>'
-      );
-    } else if (/quickapp/i.test(userAgent)) {
-      // quickapp
-      document.write('<script type="text/javascript" src="https://quickapp/jssdk.webview.min.js"><\/script>');
-    }
-  </script>
-  <!-- uni 的 SDK -->
 </body>
+<!-- 引入uni.webview.js -->
+
+<!-- 处理 uni 对象冲突（非常重要！） -->
+
+<!-- 初始化uni变量 -->
+<script type="text/javascript">
+  var userAgent = navigator.userAgent;
+  if (userAgent.indexOf('AlipayClient') > -1) {
+    // 支付宝小程序的 JS-SDK 防止 404 需要动态加载，如果不需要兼容支付宝小程序，则无需引用此 JS 文件。
+    document.writeln('<script src="https://appx/web-view.min.js"' + '>' + '<' + '/' + 'script>');
+  } else if (/QQ/i.test(userAgent) && /miniProgram/i.test(userAgent)) {
+    // QQ 小程序
+    document.write(
+      '<script type="text/javascript" src="https://qqq.gtimg.cn/miniprogram/webview_jssdk/qqjssdk-1.0.0.js"><\/script>'
+    );
+  } else if (/miniProgram/i.test(userAgent) && /micromessenger/i.test(userAgent)) {
+    // 微信小程序 JS-SDK 如果不需要兼容微信小程序，则无需引用此 JS 文件。
+    document.write('<script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"><\/script>');
+  } else if (/toutiaomicroapp/i.test(userAgent)) {
+    // 头条小程序 JS-SDK 如果不需要兼容头条小程序，则无需引用此 JS 文件。
+    document.write(
+      '<script type="text/javascript" src="https://lf1-cdn-tos.bytegoofy.com/goofy/developer/jssdk/jssdk-1.2.0.js"><\/script>');
+  } else if (/swan/i.test(userAgent)) {
+    // 百度小程序 JS-SDK 如果不需要兼容百度小程序，则无需引用此 JS 文件。
+    document.write(
+      '<script type="text/javascript" src="https://b.bdstatic.com/searchbox/icms/searchbox/js/swan-2.0.18.js"><\/script>'
+    );
+  } else if (/quickapp/i.test(userAgent)) {
+    // quickapp
+    document.write('<script type="text/javascript" src="https://quickapp/jssdk.webview.min.js"><\/script>');
+  }
+</script>
+<!-- uni 的 SDK -->
+<script type="text/javascript" src="/static/uni.webview.1.5.6.js" defer></script>
+<script>
+  document.addEventListener('UniAppJSBridgeReady', function () {
+    // 避免与 uniapp 的 uni 冲突，重命名
+    window.webUni = window.uni.webView;
+    console.log('uni.webview.js 初始化完成');
+
+    // 测试环境
+    webUni.getEnv(function (res) {
+      console.log('当前环境:' + JSON.stringify(res));
+    });
+  });
+</script>
 
 </html>
