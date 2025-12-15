@@ -7,18 +7,24 @@ const globalWindow = window as any
 // 获取URL参数
 const getQueryParams = () => {
   const urlParams = new URLSearchParams(globalWindow.location.search)
-  return {
-    timestamp: urlParams.get('timestamp'),
-    // 其他参数
+  const params: Record<string, string> = {}
+  
+  // 解析所有URL参数
+  for (const [key, value] of urlParams.entries()) {
+    params[key] = value
   }
+  
+  return params
 }
 
 // 发送消息给小程序
 const sendMessageToUniapp = (data: any) => {
   if (typeof globalWindow.webUni !== 'undefined') {
     globalWindow.webUni.postMessage({ data })
+    window.postMessage({ data })
     console.log('发送消息给小程序:', data)
   } else {
+    window.postMessage({ data })
     console.error('uni.webview.js未加载')
   }
 }
