@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 
+// 获取全局window对象
+const globalWindow = window as any
+
 // 获取URL参数
 const getQueryParams = () => {
-  const urlParams = new URLSearchParams(window.location.search)
+  const urlParams = new URLSearchParams(globalWindow.location.search)
   return {
     timestamp: urlParams.get('timestamp'),
     // 其他参数
@@ -12,8 +15,8 @@ const getQueryParams = () => {
 
 // 发送消息给小程序
 const sendMessageToUniapp = (data: any) => {
-  if (typeof (window as any).webUni !== 'undefined') {
-    (window as any).webUni.postMessage({ data })
+  if (typeof globalWindow.webUni !== 'undefined') {
+    globalWindow.webUni.postMessage({ data })
     console.log('发送消息给小程序:', data)
   } else {
     console.error('uni.webview.js未加载')
@@ -37,9 +40,8 @@ onMounted(() => {
   console.log('页面参数:', params.value)
 
   // 监听小程序消息
-  window.addEventListener('message', handleUniMessage)
-})
-</script>
+  globalWindow.addEventListener('message', handleUniMessage)
+})</script>
 
 <template>
   <div class="container">
@@ -69,9 +71,9 @@ onMounted(() => {
       <h2>环境检测</h2>
       <button 
         @click="() => {
-          if (typeof (window as any).webUni !== 'undefined') {
-            (window as any).webUni.getEnv((res: any) => {
-              alert(JSON.stringify(res, null, 2))
+          if (typeof globalWindow.webUni !== 'undefined') {
+            globalWindow.webUni.getEnv((res: any) => {
+              globalWindow.alert(JSON.stringify(res, null, 2))
             })
           }
         }"
