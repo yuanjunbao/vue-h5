@@ -1,34 +1,58 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <!-- 适配刘海屏 -->
-    <script>
-      // 检测设备是否支持安全区域适配
-      const coverSupport = 'CSS' in window && typeof CSS.supports === 'function' && 
-        (CSS.supports('top: env(safe-area-inset-top)') || CSS.supports('top: constant(safe-area-inset-top)'));
-      
-      // 动态设置viewport
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <!-- 适配刘海屏 -->
+  <script>
+    // 检测设备是否支持安全区域适配
+    const coverSupport = 'CSS' in window && typeof CSS.supports === 'function' &&
+      (CSS.supports('top: env(safe-area-inset-top)') || CSS.supports('top: constant(safe-area-inset-top)'));
+
+    // 动态设置viewport
+    document.write(
+      `<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0${coverSupport ? ', viewport-fit=cover' : ''}">`
+    );
+  </script>
+  <title>bq-vue-h5</title>
+</head>
+
+<body>
+ 
+  <div id="app"></div>
+  <script type="module" src="/src/main.ts"></script>
+  <!-- 引入uni.webview.js -->
+  <script type="text/javascript" src="/static/uni.webview.1.5.6.js"></script>
+  <!-- 初始化uni变量 -->
+  <script type="text/javascript">
+    var userAgent = navigator.userAgent;
+    if (userAgent.indexOf('AlipayClient') > -1) {
+      // 支付宝小程序的 JS-SDK 防止 404 需要动态加载，如果不需要兼容支付宝小程序，则无需引用此 JS 文件。
+      document.writeln('<script src="https://appx/web-view.min.js"' + '>' + '<' + '/' + 'script>');
+    } else if (/QQ/i.test(userAgent) && /miniProgram/i.test(userAgent)) {
+      // QQ 小程序
       document.write(
-        `<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0${coverSupport ? ', viewport-fit=cover' : ''}">`
+        '<script type="text/javascript" src="https://qqq.gtimg.cn/miniprogram/webview_jssdk/qqjssdk-1.0.0.js"><\/script>'
       );
-    </script>
-    <title>bq-vue-h5</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
-    <!-- 引入uni.webview.js -->
-    <script type="text/javascript" src="/static/uni.webview.js"></script>
-    <!-- 初始化uni变量 -->
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        if (window.uni && window.uni.webView) {
-          window.webUni = window.uni.webView;
-          console.log('uni.webview.js初始化完成');
-        }
-      });
-    </script>
-  </body>
+    } else if (/miniProgram/i.test(userAgent) && /micromessenger/i.test(userAgent)) {
+      // 微信小程序 JS-SDK 如果不需要兼容微信小程序，则无需引用此 JS 文件。
+      document.write('<script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js"><\/script>');
+    } else if (/toutiaomicroapp/i.test(userAgent)) {
+      // 头条小程序 JS-SDK 如果不需要兼容头条小程序，则无需引用此 JS 文件。
+      document.write(
+        '<script type="text/javascript" src="https://lf1-cdn-tos.bytegoofy.com/goofy/developer/jssdk/jssdk-1.2.0.js"><\/script>');
+    } else if (/swan/i.test(userAgent)) {
+      // 百度小程序 JS-SDK 如果不需要兼容百度小程序，则无需引用此 JS 文件。
+      document.write(
+        '<script type="text/javascript" src="https://b.bdstatic.com/searchbox/icms/searchbox/js/swan-2.0.18.js"><\/script>'
+      );
+    } else if (/quickapp/i.test(userAgent)) {
+      // quickapp
+      document.write('<script type="text/javascript" src="https://quickapp/jssdk.webview.min.js"><\/script>');
+    }
+  </script>
+  <!-- uni 的 SDK -->
+</body>
+
 </html>
