@@ -1,0 +1,8 @@
+pnpm lint --fix
+pnpm format
+if git diff --name-only --exit-code; then
+  echo "No changes to commit"
+else
+  git add .
+  echo "Added formatted files to commit"
+fi

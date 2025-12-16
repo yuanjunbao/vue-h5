@@ -1,13 +1,28 @@
 // UniApp通信工具类
+
+import { envDetector } from './uniEnvDetector';
+
 /**
  * 环境检测工具
  */
 export const environment = {
-  // 判断是否在uniApp环境中
+  // 环境检测
   isInApp(): boolean {
-    return navigator.userAgent.includes("miniProgram") || !!window.webUni;
+    return envDetector.isUniapp();
   },
-
+  // 系统信息
+  async getSystemInfo(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      window.uni?.getSystemInfo({
+        success: (res: any) => resolve(res),
+        fail: (err: any) => reject(err),
+      });
+    });
+  },
+  // 获取设备基础信息
+  getDeviceInfo(): any {
+    return window.uni?.getDeviceInfo();
+  },
   // 获取URL参数
   getUrlParams(): Record<string, string> {
     const params: Record<string, string> = {};
@@ -22,7 +37,7 @@ export const environment = {
   hasFeature(feature: string): boolean {
     const featureMap: Record<string, boolean> = {
       camera:
-        "mediaDevices" in navigator && "getUserMedia" in navigator.mediaDevices,
+        'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices,
       uniBridge: !!window.webUni,
     };
     return featureMap[feature] || false;
@@ -57,11 +72,11 @@ export class UniAppCommunicator {
         if (window.webUni) {
           this.webUni = window.webUni;
           this.isInitialized = true;
-          console.log("UniApp通信初始化完成");
+          console.log('UniApp通信初始化完成');
           // 处理待发送的消息
           this.flushPendingMessages();
           // 通知App页面已加载
-          this.sendEvent("pageLoaded");
+          this.sendEvent('pageLoaded');
         } else {
           setTimeout(checkUniReady, 100);
         }
@@ -70,9 +85,9 @@ export class UniAppCommunicator {
     }
 
     // 监听页面可见性变化
-    document.addEventListener("visibilitychange", () => {
+    document.addEventListener('visibilitychange', () => {
       if (!document.hidden) {
-        this.sendEvent("pageVisible");
+        this.sendEvent('pageVisible');
       }
     });
   }
@@ -95,20 +110,20 @@ export class UniAppCommunicator {
    * 处理来自App的消息
    */
   private handleAppMessage(data: any): void {
-    console.log("H5收到App消息:", data);
+    console.log('H5收到App消息:', data);
 
     const { type, action, data: payload } = data;
 
     // 根据消息类型分发
-    if (type === "response" && action) {
+    if (type === 'response' && action) {
       // 处理响应类型消息
       this.notifyHandlers(`response:${action}`, payload);
-    } else if (type === "app_data") {
+    } else if (type === 'app_data') {
       // 处理应用数据消息
-      this.notifyHandlers("app_data", payload);
+      this.notifyHandlers('app_data', payload);
     } else {
       // 处理其他类型消息
-      this.notifyHandlers(type || "unknown", payload || data);
+      this.notifyHandlers(type || 'unknown', payload || data);
     }
   }
 
@@ -117,17 +132,17 @@ export class UniAppCommunicator {
    */
   public postMessage(message: any): boolean {
     const formattedMessage = {
-      type: message.type || "message",
+      type: message.type || 'message',
       action: message.action,
       data: message.data || message,
       timestamp: Date.now(),
-      version: "1.0",
+      version: '1.0',
     };
 
     // 如果还未初始化，将消息加入待发送队列
     if (!this.isInitialized || !this.webUni) {
       this.pendingMessages.push(formattedMessage);
-      console.log("通信未初始化，消息已加入待发送队列");
+      console.log('通信未初始化，消息已加入待发送队列');
       return false;
     }
 
@@ -139,30 +154,16 @@ export class UniAppCommunicator {
       // uniWeb.postMessage({
       //   data: formattedMessage
       // });
-      window.wx?.miniProgram.postMessage({
+      window.uni?.postMessage({
         data: formattedMessage,
       });
       // window.postMessage({
       //   data: formattedMessage
       // });
-      // alert("H5发送消息到App:"+JSON.stringify(Object.keys(window.wx.miniProgram)));
-      const wx = window.wx as any;
-      // alert("H5发送消息到App:"+JSON.stringify(Object.keys(window.uni)));
-      setTimeout(() => {
-        if (typeof wx !== "undefined" && wx.miniProgram) {
-          // 重要：使用navigateTo跳转到当前页面（带参数）
-          wx.miniProgram.redirectTo({
-            url:
-              "pages/index/index?data=" +
-              encodeURIComponent(JSON.stringify(formattedMessage)),
-          });
-        } else {
-          console.error("当前不在微信小程序环境");
-        }
-      }, 100);
+      console.log('发送消息到App:', formattedMessage);
       return true;
     } catch (e) {
-      console.error("发送消息失败:", e);
+      console.error('发送消息失败:', e);
       return false;
     }
   }
@@ -172,7 +173,7 @@ export class UniAppCommunicator {
    */
   public sendEvent(eventName: string, data?: any): boolean {
     return this.postMessage({
-      type: "event",
+      type: 'event',
       action: eventName,
       data: data,
     });
@@ -200,7 +201,7 @@ export class UniAppCommunicator {
       this.addHandler(`response:${action}`, handler);
 
       const success = this.postMessage({
-        type: "request",
+        type: 'request',
         action: action,
         data: { ...data, requestId },
       });
@@ -208,7 +209,7 @@ export class UniAppCommunicator {
       if (!success) {
         clearTimeout(timeoutId);
         this.removeHandler(`response:${action}`, handler);
-        reject(new Error("发送请求失败"));
+        reject(new Error('发送请求失败'));
       }
     });
   }
@@ -267,11 +268,11 @@ export class UniAppCommunicator {
    */
   public async getUserInfo(): Promise<any> {
     try {
-      return await this.request("getUserInfo");
+      return await this.request('getUserInfo');
     } catch (e) {
-      console.error("获取用户信息失败:", e);
+      console.error('获取用户信息失败:', e);
       // 返回模拟数据或默认值
-      return { userId: "guest", userName: "游客" };
+      return { userId: 'guest', userName: '游客' };
     }
   }
 
@@ -280,8 +281,8 @@ export class UniAppCommunicator {
    */
   public downloadFile(fileInfo: { url: string; filename: string }): boolean {
     return this.postMessage({
-      type: "request",
-      action: "downloadFile",
+      type: 'request',
+      action: 'downloadFile',
       data: fileInfo,
     });
   }
